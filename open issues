@@ -1,0 +1,6 @@
+#Primary process crash when running dpdk-procinfo with veth interfaces
+Steps to reproduce:
+1. Run the primary process with shared libraries
+   #exe --vdev=event_sw_0,numa_node=0,sched_quanta=1 --vdev=eth_pcap0,iface=tun1 -c 0xff  -- -w 0x4 -r 0x2 -t 0x2 -s 0x8 -c 0x80
+2. Run dpdk-procinfo to dump veth stats
+   #dpdk-procinfo -d librte_pmd_pcap.so -d librte_mempool_ring.so -c 0x1f --vdev=eth_pcap0,iface=tun1  -- --xstats | grep -v ": 0"
