@@ -4,3 +4,20 @@ Steps to reproduce:
    #exe --vdev=event_sw_0,numa_node=0,sched_quanta=1 --vdev=eth_pcap0,iface=tun1 -c 0xff  -- -w 0x4 -r 0x2 -t 0x2 -s 0x8 -c 0x80
 2. Run dpdk-procinfo to dump veth stats
    #dpdk-procinfo -d librte_pmd_pcap.so -d librte_mempool_ring.so -c 0x1f --vdev=eth_pcap0,iface=tun1  -- --xstats | grep -v ": 0"
+
+#Secondary process doesn't detect white-listed ethernet devices in primary process unless the white-list is specified. 
+However Crypto devices (VFs) are recognized
+root@saesrv01-S2600CWR:~/sivapt/dpdk/dpdk-17.11/x86_64-native-linuxapp-gcc/lib# ../app/dpdk-procinfo -d librte_pmd_ixgbe.so -d librte_mempool_ring.so -c 0xf -- -p 3
+EAL: PCI device 0000:03:00.0 on NUMA socket 0
+EAL:   probe driver: 8086:10fb net_ixgbe
+EAL: Requested device 0000:03:00.0 cannot be used   <-> Error
+EAL: PCI device 0000:03:00.1 on NUMA socket 0
+EAL:   probe driver: 8086:10fb net_ixgbe
+EAL: Requested device 0000:03:00.1 cannot be used   <-> Error
+EAL: Error - exiting with code: 1
+  Cause: No Ethernet ports - bye
+
+-> (Primary) ../../examples/ipsec-secgw/build/ipsec-secgw -d librte_pmd_ixgbe.so -d librte_pmd_qat.so -d librte_mempool_ring.so -w 03:00.0 -w 07:01.0 -c 0xf -- -p 0x3 -P -u 0x2 --config="(0,0,1),(1,0,2)"  -f ep0.cfg
+-> ../app/dpdk-procinfo -d librte_pmd_ixgbe.so -d librte_mempool_ring.so -c 0xf -- -p 3  (not working) 
+-> ../app/dpdk-procinfo -d librte_pmd_ixgbe.so -d librte_mempool_ring.so -w 03:00.0 -w 03:00.1 -c 0xf -- -p 3 --stats  (working)
+-> ../app/dpdk-procinfo -d librte_pmd_qat.so -d librte_mempool_ring.so -c 0xf -- -p 3 --stats  (working)
