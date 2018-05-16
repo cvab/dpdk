@@ -21,3 +21,6 @@ EAL: Error - exiting with code: 1
 -> ../app/dpdk-procinfo -d librte_pmd_ixgbe.so -d librte_mempool_ring.so -c 0xf -- -p 3  (not working) 
 -> ../app/dpdk-procinfo -d librte_pmd_ixgbe.so -d librte_mempool_ring.so -w 03:00.0 -w 03:00.1 -c 0xf -- -p 3 --stats  (working)
 -> ../app/dpdk-procinfo -d librte_pmd_qat.so -d librte_mempool_ring.so -c 0xf -- -p 3 --stats  (working)
+
+
+-> Add Eventdev stats support in proc_info
