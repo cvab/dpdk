@@ -232,7 +232,11 @@ nm -D dynamic symbol
 
 ****************
 *   STRACE     *  
-****************
+****************    
+         ptrace      ltrace         strace			     		
+       ...............  ...........  ...............  .......... 	
+       : UserProgram :->: Library :->: System Call :->: Kernel :			
+       ............... 	...........  ...............  .......... 	
   STrace userspace utility for Linux helps to diagnose, debug and instructional by monitoring system calls and signal. The operation of strace is made possible by the kernel feature known as ptrace.
   Specifying a list of paths to be traced (-P /etc/ld.so.cache, for example).
   Modifying return and error code of the specified syscalls, and inject signals upon their execution (since strace 4.15, -e inject= option).
