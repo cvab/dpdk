@@ -1,0 +1,247 @@
+********************** 
+* DPDK Process probe *
+**********************
+  rte_eal_get_configuration()
+  rte_eal_lcore_rule()
+  rte_eal_process_type()
+  rte_sys_gettid()/rte_gettid()
+  rte_eal_mbuf_user_pool_ops()
+  rte_version()
+  rte_dump_stack() & rte_dump_registers()
+  rte_strerror()
+  rte_hexdump() & rte_memdump()
+***********************
+* Port Specific info  *  
+***********************  
+  rte_eth_dev_count_avail() & rte_eth_dev_socket_id()
+  rte_eth_dev_is_valid_port()
+  rte_eth_promiscuous_get() 
+  rte_eth_link_get(), rte_eth_link_get_nowait()
+  rte_eth_stats_get(), rte_eth_xstats_get(), rte_eth_xstats_get_names()
+  rte_eth_macaddr_get(), rte_eth_dev_get_mtu()
+  rte_eth_dev_info_get(), rte_eth_rx_queue_info_get(), rte_eth_tx_queue_info_get()
+*****************
+*  Memory Dump  *  
+*****************  
+  TailQ: rte_dump_tailq(), rte_eal_tailq_lookup()
+  Ring: rte_ring_count(), rte_ring_free_count(), rte_ring_full(), rte_ring_empty(), rte_ring_list_dump()
+  Malloc: rte_malloc_dump_stats(), rte_malloc_dump_heaps()
+  Mempool: rte_mempool_list_dump()
+  Memzone: rte_memzone_dump()
+***************
+*  MBUF Dump  *  
+***************  
+  rte_pktmbuf_priv_size()
+  rte_mbuf_refcnt_read()
+  rte_pktmbuf_dump() 
+******************
+* Service Cores  *  
+******************  
+  rte_service_get_count()
+  rte_service_lcore_count_services()
+  rte_service_dump()
+*******************
+* Traffic Manager *  
+*******************  
+  rte_tm_get_number_of_leaf_nodes , rte_tm_node_type_get 
+  rte_tm_capabilities_get, 
+  rte_tm_level_capabilities_get, rte_tm_node_capabilities_get
+*******************
+* Cryptodev LA    *  
+*******************  
+  rte_cryptodev_stats_get
+  rte_cryptodev_count , rte_cryptodev_device_count_by_driver 
+  rte_cryptodev_queue_pair_count
+  rte_cryptodev_devices_get
+*********************
+* Cryptodev Inline  *  
+*********************  
+  rte_security_session_stats_get
+*************
+* Eventdev  *  
+*************  
+  rte_event_dev_count()
+  rte_event_dev_dump()
+*************
+* API Debug *  
+*************  
+  rte_eal_get_configuration – get master, lcores, count, process type, memory information
+  rte_eal_process_type - primary/secondary
+  rte_eal_primary_proc_alive 
+  rte_sys_gettid 	
+  rte_mbuf_sanity_check
+  rte_pktmbuf_data_room_size
+  rte_pktmbuf_dump
+  rte_pktmbuf_lastseg
+  rte_pktmbuf_is_contiguous
+  rte_eth_macaddr_get
+  rte_eth_dev_info_get
+  rte_eth_dev_get_mtu
+  rte_hexdump
+  rte_strerror
+  rte_event_dev_count
+  rte_event_dev_dump 
+  rte_memzone_dump
+  rte_mempool_list_dump
+----------------------------------------------------------------------------------------------------
+          LINUX DEBUG UTILITIES
+----------------------------------------------------------------------------------------------------
+  SIMD and intrinsic
+  Cache and memory monitoring with Linux tools.
+  Firmware version check and Firmware upgrade/downgrade.
+  NUMA memory, PCIe and performance
+  Memory monitoring
+  Interrupts and system context switch cases.
+  Memory maps.
+  lscpu
+  cat /proc/cpuinfo
+  cat /proc/meminfo
+  lspci
+  lshw
+      lshw -c network –businfo
+      lshw -c network | egrep 'firmware|pci@‘
+**********************
+* Network Interfaces *  
+**********************  
+  ethtool
+  ethtool –S <ifname>
+  ethtool –i <ifname>
+  ethtool –p <ifname>
+  ethtool –m <ifname>
+  ethtool –k <ifname>
+  ethtool –P <ifname>
+  ethtool --phy-statistics <ifname>
+  cat /proc/net/dev | grep <ifname>
+  cat /proc/interrupts | grep <ifname>
+  nstat
+*****************
+* Process Debug *  
+*****************
+  Debug tools
+  Use of GDB and features 
+  Use of LD_PRELOAD
+  Core file generate
+  Use of ltrace, strace, ptrace
+  Stack flow analysis.
+  GCC and build info
+  Perf stat |Vtunes usage
+  stack trace for all threads without GDB|PTRACE|PDUMP
+**************
+*  GDB Debug *  
+**************
+  call actual library functions or even functions from within the debugged program using the command call
+  start GDB with gdbtui or gdb -tui. Switch using 'layout src|asm|regs'
+  shell allows you to execute commands in the shell. print, examine and display
+  info file - Entry point
+  set disassembly-flavor intel
+  set print pretty
+  set print addr off
+  set print array
+  set print array on
+  set print array off
+  display next 5 instructions - x/5i $pc
+  disassemble <function name>
+  
+  .gdbinit
+	file exe
+	break *0x400710
+	set disassembly-flavor intel
+	layout asm
+	layout regs
+	run argument1 argument2
+
+  we can use set so do the magic for us. Let's first inspect the instruction bytes:
+  (gdb) x/10b $pc
+  (gdb) set write
+  (gdb) set {unsigned int}$pc = 0x90909090
+  (gdb) set {unsigned char}($pc+4) = 0x90
+  (gdb) set write off 
+  (gdb) x/10i $pc
+  x/6i $pc
+  => 0x40911f:    nop
+     0x409120:    nop
+     0x409121:    nop
+     0x409122:    nop
+     0x409123:    nop
+     0x409124:    push   rbp
+  set {unsigned int}0x40911f = 0x90909090
+  {unsigned char}0x409123 = 0x9
+  set $pc+=5
+  jump *$pc+5
+*****************
+*  LD_PRELOAD   *  
+*****************
+  set LD_PRELOAD to the path of a shared object, that file will be loaded before any other library (including the C runtime, libc.so). 
+  To run with special library (example malloc) ‘LD_PRELOAD=/path/to/my/malloc.so /bin/ls’
+*****************
+*  Core Dump    *  
+*****************
+  ulimit -a
+    core file size        (blocks, -c) 0
+    data seg size         (kbytes, -d) unlimited
+    file size             (blocks, -f) unlimited
+    max locked memory     (kbytes, -l) 32
+    max memory size       (kbytes, -m) unlimited
+    open files                    (-n) 1024
+    pipe size          (512 bytes, -p) 8
+    stack size            (kbytes, -s) 8192
+    cpu time             (seconds, -t) unlimited
+    max user processes            (-u) 960
+    virtual memory        (kbytes, -v) unlimited
+  ulimit -c unlimited
+  cat /proc/<process id>/limits
+  cat /proc/<process id>/sched
+*****************
+*  OBJDUMP      *  
+*****************
+objdump
+    File header: -f 
+    File format: -p
+    Section header: -h
+    All headers: -x
+    Executable sections: -d
+    Assembler sections: -D
+    Full contents: -s
+    Debug: -g
+    Symbol table: -t
+    Dynamic Symbol table: -T
+    Dynamic Relocation: -R
+    Function content via name: -s -j.rodata, -D --prefix-addresses   
+readelf --relocs
+nm <executable>
+    t|T – The symbol is present in the .text code section
+    b|B – The symbol is in UN-initialized .data section
+    D|d – The symbol is in Initialized .data section.
+    A :  Global absolute symbol.
+    a  :  Local absolute symbol.
+    B : Global bss symbol.
+    b : Local bss symbol.
+    D : Global data symbol.
+    d : Local data symbol.
+    f : Source file name symbol.
+    L : Global thread-local symbol (TLS).
+    l : Static thread-local symbol (TLS).
+    T : Global text symbol.
+    t  : Local text symbol.
+    U : Undefined symbol.
+nm  -A ./*.o
+nm -u undefined symbols
+nm -n symbol
+nm -S symbol wth size
+nm -D dynamic symbol
+
+****************
+*   STRACE     *  
+****************
+  STrace userspace utility for Linux helps to diagnose, debug and instructional by monitoring system calls and signal. The operation of strace is made possible by the kernel feature known as ptrace.
+  Specifying a list of paths to be traced (-P /etc/ld.so.cache, for example).
+  Modifying return and error code of the specified syscalls, and inject signals upon their execution (since strace 4.15, -e inject= option).
+  Extracting information about file descriptors (including sockets, -y option).
+   strace -e trace=open,read <executable>
+   strace -t -e open <Executable>
+   strace -r -e open <exdcutable>
+   strace -c <executbale>
+   strace -i <executable>
+   strace -T -e read <executable>
+   strace -e trace=network|signal|memory <executable>
+
