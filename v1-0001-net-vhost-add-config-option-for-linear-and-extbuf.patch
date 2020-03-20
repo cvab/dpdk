@@ -1,0 +1,110 @@
+From b50d3ca0ba54163d1dc9ec17d04bdad3c708cad3 Mon Sep 17 00:00:00 2001
+From: Sivaprasad Tummala <Sivaprasad.Tummala@intel.com>
+Date: Tue, 18 Feb 2020 12:54:38 +0000
+Subject: [PATCH v1] net/vhost: add config option for linear and extbuf
+
+Added vHost PMD arguments 'linear-buffer' and 'ext-buffer'
+to configure  'RTE_VHOST_USER_LINEARBUF_SUPPORT' and
+'RTE_VHOST_USER_EXTBUF_SUPPORT' flags in the vhost library
+
+Signed-off-by: Sivaprasad Tummala <Sivaprasad.Tummala@intel.com>
+---
+ doc/guides/nics/vhost.rst         | 10 ++++++++++
+ drivers/net/vhost/rte_eth_vhost.c | 32 ++++++++++++++++++++++++++++++-
+ 2 files changed, 41 insertions(+), 1 deletion(-)
+
+diff --git a/doc/guides/nics/vhost.rst b/doc/guides/nics/vhost.rst
+index 912f4bdd9..d36f3120b 100644
+--- a/doc/guides/nics/vhost.rst
++++ b/doc/guides/nics/vhost.rst
+@@ -54,6 +54,16 @@ The user can specify below arguments in `--vdev` option.
+     It is used to enable tso support in vhost library.
+     (Default: 0 (disabled))
+ 
++#.  ``linear-buffer``:
++
++    It is used to enable linear buffer support in vhost library.
++    (Default: 0 (disabled))
++
++#.  ``ext-buffer``:
++
++    It is used to enable external buffer support in vhost library.
++    (Default: 0 (disabled))
++
+ Vhost PMD event handling
+ ------------------------
+ 
+diff --git a/drivers/net/vhost/rte_eth_vhost.c b/drivers/net/vhost/rte_eth_vhost.c
+index a63588986..9f2e85a1b 100644
+--- a/drivers/net/vhost/rte_eth_vhost.c
++++ b/drivers/net/vhost/rte_eth_vhost.c
+@@ -32,6 +32,8 @@ enum {VIRTIO_RXQ, VIRTIO_TXQ, VIRTIO_QNUM};
+ #define ETH_VHOST_IOMMU_SUPPORT		"iommu-support"
+ #define ETH_VHOST_POSTCOPY_SUPPORT	"postcopy-support"
+ #define ETH_VHOST_VIRTIO_NET_F_HOST_TSO "tso"
++#define ETH_VHOST_LINEAR_BUF  "linear-buffer"
++#define ETH_VHOST_EXT_BUF  "ext-buffer"
+ #define VHOST_MAX_PKT_BURST 32
+ 
+ static const char *valid_arguments[] = {
+@@ -42,6 +44,8 @@ static const char *valid_arguments[] = {
+ 	ETH_VHOST_IOMMU_SUPPORT,
+ 	ETH_VHOST_POSTCOPY_SUPPORT,
+ 	ETH_VHOST_VIRTIO_NET_F_HOST_TSO,
++	ETH_VHOST_LINEAR_BUF,
++	ETH_VHOST_EXT_BUF,
+ 	NULL
+ };
+ 
+@@ -1358,6 +1362,8 @@ rte_pmd_vhost_probe(struct rte_vdev_device *dev)
+ 	int iommu_support = 0;
+ 	int postcopy_support = 0;
+ 	int tso = 0;
++	int linear_buf = 0;
++	int ext_buf = 0;
+ 	struct rte_eth_dev *eth_dev;
+ 	const char *name = rte_vdev_device_name(dev);
+ 
+@@ -1452,6 +1458,28 @@ rte_pmd_vhost_probe(struct rte_vdev_device *dev)
+ 		}
+ 	}
+ 
++	if (rte_kvargs_count(kvlist, ETH_VHOST_LINEAR_BUF) == 1) {
++		ret = rte_kvargs_process(kvlist,
++				ETH_VHOST_LINEAR_BUF,
++				&open_int, &linear_buf);
++		if (ret < 0)
++			goto out_free;
++
++		if (linear_buf == 1)
++			flags |= RTE_VHOST_USER_LINEARBUF_SUPPORT;
++	}
++
++	if (rte_kvargs_count(kvlist, ETH_VHOST_EXT_BUF) == 1) {
++		ret = rte_kvargs_process(kvlist,
++				ETH_VHOST_EXT_BUF,
++				&open_int, &ext_buf);
++		if (ret < 0)
++			goto out_free;
++
++		if (ext_buf == 1)
++			flags |= RTE_VHOST_USER_EXTBUF_SUPPORT;
++	}
++
+ 	if (dev->device.numa_node == SOCKET_ID_ANY)
+ 		dev->device.numa_node = rte_socket_id();
+ 
+@@ -1503,7 +1531,9 @@ RTE_PMD_REGISTER_PARAM_STRING(net_vhost,
+ 	"dequeue-zero-copy=<0|1> "
+ 	"iommu-support=<0|1> "
+ 	"postcopy-support=<0|1> "
+-	"tso=<0|1>");
++	"tso=<0|1> "
++	"linear-buffer=<0|1> "
++	"ext-buffer=<0|1>");
+ 
+ RTE_INIT(vhost_init_log)
+ {
+-- 
+2.17.1
+

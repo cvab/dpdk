@@ -1,0 +1,32 @@
+From b40d79c3bae93ad203dbc26fc3f47d224f336503 Mon Sep 17 00:00:00 2001
+From: Sivaprasad Tummala <Sivaprasad.Tummala@intel.com>
+Date: Wed, 26 Feb 2020 06:44:21 +0000
+Subject: [PATCH v1] examples/l2fwd: add check for promiscuous no support
+
+l2fwd application exits, if return for rte_eth_promiscuous_enable
+is not success. But for vHost PMD, promiscuous enable returns "Not
+Supported".
+
+This patch validates success and no support of promiscuous enable.
+
+Signed-off-by: Sivaprasad Tummala <Sivaprasad.Tummala@intel.com>
+---
+ examples/l2fwd/main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/examples/l2fwd/main.c b/examples/l2fwd/main.c
+index 09257aab1..ea9831f07 100644
+--- a/examples/l2fwd/main.c
++++ b/examples/l2fwd/main.c
+@@ -727,7 +727,7 @@ main(int argc, char **argv)
+ 		printf("done: \n");
+ 
+ 		ret = rte_eth_promiscuous_enable(portid);
+-		if (ret != 0)
++		if ((ret != 0) && (ret != -ENOTSUP))
+ 			rte_exit(EXIT_FAILURE,
+ 				 "rte_eth_promiscuous_enable:err=%s, port=%u\n",
+ 				 rte_strerror(-ret), portid);
+-- 
+2.17.1
+
